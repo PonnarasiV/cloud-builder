@@ -2,14 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: sample-hello
-  name: sample-hello
+    app: hello-worldpoc
+  name: hello-worldpoc
   namespace: default
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: sample-hello
+      app: hello-worldpoc
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -18,10 +18,10 @@ spec:
   template:
     metadata:
       labels:
-        app: sample-hello
+        app: hello-worldpoc
     spec:
       containers:
-        - image: gcr.io/voltaic-cirrus-292815/github.com/afrin456/cloud-builder
+        - image: gcr.io/numeric-marker-290502/github.com/ponnarasiv/cloud-builder
           imagePullPolicy: IfNotPresent
           name: cloud-builder-1
 ---
@@ -29,8 +29,8 @@ apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   labels:
-    app: sample-hello
-  name: sample-hello-hpa-5ijy
+    app: hello-worldpoc
+  name: hello-worldpoc-hpa-eslb
   namespace: default
 spec:
   maxReplicas: 5
@@ -43,4 +43,26 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: sample-hello
+    name: hello-worldpoc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  finalizers:
+    - service.kubernetes.io/load-balancer-cleanup
+  labels:
+    app: hello-worldpoc
+  name: hello-worldpoc-service
+  namespace: default
+spec:
+  clusterIP: 10.120.15.1
+  externalTrafficPolicy: Cluster
+  ports:
+    - nodePort: 32687
+      port: 80
+      protocol: TCP
+      targetPort: 3000
+  selector:
+    app: hello-worldpoc
+  sessionAffinity: None
+  type: LoadBalancer
